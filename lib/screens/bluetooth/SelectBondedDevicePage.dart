@@ -5,7 +5,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:ghada/utils/colors.dart';
-import 'package:permission_handler/permission_handler.dart';
 import './BluetoothDeviceListEntry.dart';
 
 class SelectBondedDevicePage extends StatefulWidget {
@@ -41,7 +40,7 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
   _SelectBondedDevicePage();
 
   @override
-  Future<void> initState() async {
+  void initState() {
     super.initState();
 
     _isDiscovering = widget.checkAvailability;
@@ -49,31 +48,23 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
     if (_isDiscovering) {
       _startDiscovery();
     }
-    var status = await Permission.bluetoothScan.request().isGranted;
-    if (!status) {
-      // The user opted to never again see the permission request dialog for this
-      // app. The only way to change the permission's status now is to let the
-      // user manually enables it in the system settings.
 
-      openAppSettings();
-    } else {
-      FlutterBluetoothSerial.instance
-          .getBondedDevices()
-          .then((List<BluetoothDevice> bondedDevices) {
-        setState(() {
-          devices = bondedDevices
-              .map(
-                (device) => _DeviceWithAvailability(
-                  device,
-                  widget.checkAvailability
-                      ? _DeviceAvailability.maybe
-                      : _DeviceAvailability.yes,
-                ),
-              )
-              .toList();
-        });
+    FlutterBluetoothSerial.instance
+        .getBondedDevices()
+        .then((List<BluetoothDevice> bondedDevices) {
+      setState(() {
+        devices = bondedDevices
+            .map(
+              (device) => _DeviceWithAvailability(
+                device,
+                widget.checkAvailability
+                    ? _DeviceAvailability.maybe
+                    : _DeviceAvailability.yes,
+              ),
+            )
+            .toList();
       });
-    }
+    });
   }
 
   void _restartDiscovery() {
